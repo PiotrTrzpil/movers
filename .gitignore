@@ -17,7 +17,7 @@
 /bin/test-external
 /doc/
 /target/
-/.idea/**
+/.idea
 /build/
 /.rust/
 rusti.sh

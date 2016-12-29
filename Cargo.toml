@@ -1,0 +1,35 @@
+[package]
+name = "movers"
+version = "0.0.0"
+authors = ["PiotrTrzpil <piotr.trzpil@gmail.com>"]
+keywords = []
+
+[[bin]]
+name = "main"
+path = "src/main.rs"
+
+[dependencies]
+clippy = {version = "*", optional = false}
+chrono = "0.2"
+piston = "0.27.0"
+piston_window = "0.58.0"
+pistoncore-sdl2_window = "0.37.0"
+piston-ai_behavior = "0.17.0"
+piston2d-sprite = "0.31.0"
+piston2d-drag_controller = "0.16.0"
+piston2d-graphics = "0.19.0"
+piston2d-opengl_graphics = "0.36.0"
+find_folder = "0.3.0"
+image = "0.10.0"
+gfx = "0.12.0"
+gfx_device_gl = "0.11.0"
+vecmath = "0.2.0"
+camera_controllers = "0.18.0"
+rand = "0.3.14"
+shader_version = "0.2.1"
+
+[dependencies.cgmath]
+git = "https://github.com/bjz/cgmath-rs.git"
+
+[features]
+default = []
