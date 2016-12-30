@@ -1,4 +1,8 @@
 
+
+extern crate gfx_device_gl;
+extern crate piston_window;
+
 use std::cell::*;
 use std::rc::*;
 use std::mem;
@@ -6,29 +10,32 @@ use piston_window::*;
 use opengl_graphics::{ GlGraphics };
 use cgmath::{ Vector2 };
 use cgmath::InnerSpace;
-
+use piston_window::*;
 use app::mover::*;
 use app::shapes::*;
+use app::textures::*;
 
 
 
 pub struct Game {
-    gl: GlGraphics, // OpenGL drawing backend.
     movers: Vec<Rc<RefCell<Mover>>>,
     last_mouse_pos: Vector2<f64>,
     selection: Option<Rc<RefCell<Mover>>>,
-    selection_shape: Option<Selection>
+    selection_shape: Option<Selection>,
+    textures: Textures,
+    texture: Texture<gfx_device_gl::Resources>
 }
 
 impl Game {
 
-    pub fn new(opengl: OpenGL) -> Game {
+    pub fn new(textures: Textures, tex: Texture<gfx_device_gl::Resources>) -> Game {
         Game {
-            gl: GlGraphics::new(opengl),
             movers: vec![],
             last_mouse_pos: Vector2::new(0.0, 0.0),
             selection: None,
             selection_shape: None,
+            textures: textures,
+            texture: tex
         }
     }
 
@@ -61,28 +68,6 @@ impl Game {
         }
         self.selection_shape = None;
     }
-    pub fn handle_selection(&mut self) -> bool {
-        let mut handled = false;
-        for mover_rc in &mut self.movers {
-            let cell = &(*mover_rc);
-            let mover = &cell.borrow_mut();
-            let bounds = MyRectangle {
-                position: mover.position - Vector2::new(10.0, 10.0),
-                width: 20.0,
-                height: 20.0
-            };
-            if self.last_mouse_pos.is_in_bounds(&bounds) {
-                if self.selection.is_some() {
-                    let selection = mem::replace(&mut self.selection, None).unwrap();
-                    drop(selection);
-                }
-                println!("Selected at {}, {}", mover.position.x, mover.position.y);
-                self.selection = Some(mover_rc.clone());
-                handled = true;
-            }
-        }
-        handled
-    }
 
     pub fn input_button(&mut self, button: Button, pressed: bool) {
         if pressed {
@@ -104,6 +89,9 @@ impl Game {
                 Button::Mouse(MouseButton::Left) => {
                     self.end_selection();
                 }
+                Button::Mouse(MouseButton::Right) => {
+
+                }
                 _ => ()
             }
         }
@@ -116,20 +104,27 @@ impl Game {
         };
     }
 
-    pub fn render(&mut self, args: &RenderArgs) {
+    pub fn render(&mut self, window: &mut PistonWindow, e: &piston_window::Event, _: &RenderArgs) {
         const GREEN: [f32; 4] = [0.0, 1.0, 0.0, 1.0];
 
-        self.gl.draw(args.viewport(), |_, gl| {
+        window.draw_2d(e, |c, gl| {
             clear(GREEN, gl);
+            for x in 0..8 {
+                for y in 0..5 {
+                    let trans: &math::Matrix2d = &c.transform;
+                    let transform2 = trans.trans(150.0 * x as f64, 150.0 * y as f64);//.scale(0.333, 0.333);
+                    image(&self.texture, transform2, gl);
+                }
+            }
         });
 
         for mover_rc in &self.movers {
             let mover = &mut (*mover_rc).borrow_mut();
-            mover.render(args, &mut self.gl);
+            mover.render(window, e, &self.textures);
         }
 
         if let Some(ref selection) = self.selection_shape {
-            selection.render(args, &mut self.gl);
+            selection.render(window, e);
         };
     }
 

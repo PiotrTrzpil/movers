@@ -1,5 +1,5 @@
 extern crate std;
-
+extern crate piston_window;
 use std::cell::*;
 use std::rc::*;
 use std::mem;
@@ -9,6 +9,8 @@ use cgmath::{ Vector2 };
 use cgmath::InnerSpace;
 use app::shapes::*;
 use std::cmp::*;
+use piston_window::*;
+use app::textures::*;
 
 pub struct Selection {
     start_pos: Vector2<f64>,
@@ -45,24 +47,16 @@ impl Selection {
         [self.start_pos.x, self.start_pos.y, self.end_pos.x - self.start_pos.x, self.end_pos.y - self.start_pos.y]
     }
 
-    pub fn render(&self, args: &RenderArgs, gl: &mut GlGraphics) {
-
-
-        let mut grid = deform::DeformGrid::new(
+    pub fn render(&self, window: &mut PistonWindow, e: &piston_window::Event) {
+        let grid = deform::DeformGrid::new(
             self.as_rectangle(),
-           //[20.0, 20.0, self.start_pos.x, self.start_pos.y],
             1, 1
         );
-
 
         use graphics::*;
         const RED:   [f32; 4] = [1.0, 0.0, 0.0, 1.0];
 
-       // let lin:Line = line::Line::new(RED, 3.0);
-
-       // let (x, y) = (50.0, 50.0);
-
-        gl.draw(args.viewport(), |c, gl| {
+        window.draw_2d(e, |c, gl| {
 
             grid.draw_vertical_lines(
                 &Line::new(RED, 0.5),
@@ -76,12 +70,6 @@ impl Selection {
                 c.transform,
                 gl
             );
-
-//            let transform = c.transform.trans(x, y)
-//                .rot_rad(0.0)
-//                .trans(-25.0, -25.0);
-//
-//            line(RED, 3.0, lin, transform, gl);
         });
     }
 
@@ -126,23 +114,15 @@ impl Mover {
         };
     }
 
-    pub fn render(&self, args: &RenderArgs, gl: &mut GlGraphics) {
+    pub fn render(&self, window: &mut PistonWindow, e: &piston_window::Event, textures: &Textures) {
         use graphics::*;
 
-        const RED:   [f32; 4] = [1.0, 0.0, 0.0, 1.0];
-
-        let square = rectangle::square(0.0, 0.0, 50.0);
-        let rotation = self.rotation;
         let (x, y) = (self.position.x,
                       self.position.y);
 
-        gl.draw(args.viewport(), |c, gl| {
-
-            let transform = c.transform.trans(x, y)
-                .rot_rad(rotation)
-                .trans(-25.0, -25.0);
-
-            rectangle(RED, square, transform, gl);
+        window.draw_2d(e, |c, gl| {
+            let trans = c.transform.trans(x, y).scale(0.3, 0.3).trans(-40.0, -50.0);
+            image(textures.get(&"robot.png".to_string()), trans, gl);
         });
     }
 }

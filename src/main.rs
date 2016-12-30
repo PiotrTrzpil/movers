@@ -7,6 +7,8 @@ extern crate piston;
 extern crate graphics;
 extern crate opengl_graphics;
 extern crate cgmath;
+extern crate find_folder;
+extern crate gfx_device_gl;
 
 use std::cell::*;
 use std::rc::*;
@@ -19,11 +21,12 @@ use cgmath::InnerSpace;
 mod app;
 use app::game::*;
 use app::mover::*;
+use app::textures::*;
 
 fn main() {
     let opengl = OpenGL::V3_2;
 
-    let (width, height) = (300, 300);
+    let (width, height) = (1000, 600);
     let mut window: PistonWindow =
     WindowSettings::new("Movers", (width, height))
         .exit_on_esc(true)
@@ -31,9 +34,18 @@ fn main() {
         .build()
         .unwrap();
 
+    let mut textures = Textures::new();
+
+
+    textures.load_into_map(&mut window, "robot.png".to_string());
+
+
     let mover1 = Mover::new(Vector2::new(width as f64 /2.0 - 20.0, height as f64 /2.0 - 20.0));
     let mover2 = Mover::new(Vector2::new(width as f64 /2.0 + 25.0, height as f64 /2.0 + 25.0));
-    let mut app = Game::new(opengl);
+
+
+    let tex = textures.load(&mut window, "ground.png");
+    let mut app = Game::new(textures, tex);
     app.add_mover(mover1);
     app.add_mover(mover2);
 
@@ -52,7 +64,7 @@ fn main() {
         }
 
         if let Some(r) = e.render_args() {
-            app.render(&r);
+            app.render(&mut window, &e, &r);
         }
 
         if let Some(u) = e.update_args() {
