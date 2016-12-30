@@ -14,8 +14,7 @@ use piston_window::*;
 use app::mover::*;
 use app::shapes::*;
 use app::textures::*;
-
-
+use app::selection::*;
 
 pub struct Game {
     movers: Vec<Rc<RefCell<Mover>>>,

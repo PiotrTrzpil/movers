@@ -11,3 +11,4 @@ pub mod game;
 pub mod mover;
 pub mod shapes;
 pub mod textures;
+pub mod selection;
