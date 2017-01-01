@@ -38,6 +38,7 @@ fn main() {
 
 
     textures.load_into_map(&mut window, "robot.png".to_string());
+    textures.load_into_map(&mut window, "storage.png".to_string());
 
 
     let mover1 = Mover::new(Vector2::new(width as f64 /2.0 - 20.0, height as f64 /2.0 - 20.0));

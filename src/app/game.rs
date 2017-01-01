@@ -131,6 +131,7 @@ impl InputMode for SelectionInputMode {
 pub struct GameLogic {
     last_mouse_pos: Vector2<f64>,
     movers: Vec<Rc<RefCell<Mover>>>,
+    statics: Vec<Rc<RefCell<Static>>>,
     selection: Option<Rc<RefCell<Mover>>>
 }
 
@@ -139,6 +140,7 @@ impl GameLogic {
         GameLogic {
             last_mouse_pos: Vector2::new(0.0, 0.0),
             movers: vec![],
+            statics: vec![Rc::new(RefCell::new(Static::new(Vector2::new(100.0, 100.0))))],
             selection: None
         }
     }
@@ -156,6 +158,10 @@ impl GameLogic {
         for mover_rc in &self.movers {
             let mover = &mut (*mover_rc).borrow_mut();
             mover.render(window, e, textures);
+        }
+        for static_rc in &self.statics {
+            let _static = &mut (*static_rc).borrow_mut();
+            _static.render(window, e, textures);
         }
     }
 }
@@ -203,7 +209,7 @@ impl Game {
             for x in 0..8 {
                 for y in 0..5 {
                     let trans: &math::Matrix2d = &c.transform;
-                    let transform2 = trans.trans(150.0 * x as f64, 150.0 * y as f64);//.scale(0.333, 0.333);
+                    let transform2 = trans.trans(150.0 * x as f64, 150.0 * y as f64);
                     image(&self.texture, transform2, gl);
                 }
             }

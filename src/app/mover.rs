@@ -59,3 +59,26 @@ impl Mover {
         });
     }
 }
+
+pub struct Static {
+    pub position: Vector2<f64>
+}
+impl Static {
+    pub fn new(position: Vector2<f64>) -> Static {
+        Static {
+            position: position
+        }
+    }
+
+    pub fn render(&self, window: &mut PistonWindow, e: &piston_window::Event, textures: &Textures) {
+        use graphics::*;
+
+        let (x, y) = (self.position.x,
+                      self.position.y);
+
+        window.draw_2d(e, |c, gl| {
+            let trans = c.transform.trans(x, y).scale(0.3, 0.3).trans(-40.0, -50.0);
+            image(textures.get(&"storage.png".to_string()), trans, gl);
+        });
+    }
+}
