@@ -155,6 +155,17 @@ impl GameLogic {
         }
     }
     pub fn render(&mut self, window: &mut PistonWindow, e: &piston_window::Event, textures: &Textures) {
+        if let Some(ref selected_rc) = self.selection {
+            let mover = &mut (*selected_rc).borrow_mut();
+            use graphics::*;
+            let x = mover.position.x;
+            let y = mover.position.y;
+
+            const GREEN:   [f32; 4] = [0.0, 1.0, 0.0, 1.0];
+            window.draw_2d(e, |c, gl| {
+                Ellipse::new_border(GREEN, 1.0).draw([x - 15.0, y + 20.0, 35.0, 25.0], &c.draw_state, c.transform, gl);
+            });
+        }
         for mover_rc in &self.movers {
             let mover = &mut (*mover_rc).borrow_mut();
             mover.render(window, e, textures);
@@ -163,6 +174,7 @@ impl GameLogic {
             let _static = &mut (*static_rc).borrow_mut();
             _static.render(window, e, textures);
         }
+
     }
 }
 pub struct Game {
