@@ -2,7 +2,15 @@
 
 extern crate gfx_device_gl;
 extern crate piston_window;
+extern crate futures;
+extern crate tokio_timer;
+extern crate tokio_core;
+extern crate futures_cpupool;
 
+use self::futures_cpupool::*;
+use self::futures::*;
+use self::futures::future::*;
+use self::tokio_timer::*;
 use std::cell::*;
 use std::rc::*;
 use std::mem;
@@ -15,7 +23,10 @@ use app::mover::*;
 use app::shapes::*;
 use app::textures::*;
 use app::selection::*;
-
+use std::time::*;
+use self::tokio_core::reactor::*;
+use std::thread;
+use std::sync::mpsc;
 
 pub struct DefaultInputMode {
     last_mouse_pos: Vector2<f64>,
@@ -187,6 +198,23 @@ pub struct Game {
 impl Game {
 
     pub fn new(textures: Textures, tex: Texture<gfx_device_gl::Resources>) -> Game {
+        let (tx, rx) = mpsc::channel();
+
+        let th = thread::spawn(move || {
+            let mut core: Core = Core::new().unwrap();
+            let remote = core.remote();
+            tx.send(remote).unwrap();
+            let _ = core.run(futures::empty::<String, String>());
+        });
+
+        let rem: Remote = rx.recv().unwrap();
+
+        rem.spawn(|_| {
+            ok({
+                println!("Started logic event loop.");
+            })
+        });
+
         Game {
             textures: textures,
             texture: tex,
