@@ -35,6 +35,21 @@ struct SelectionInputMode {
     selection_shape: Selection,
 }
 
+pub trait Command {
+
+}
+
+struct MoveCommand {
+
+}
+impl MoveCommand {
+
+}
+
+impl Command for MoveCommand {
+
+}
+
 pub trait InputMode {
     //fn new() -> Self;
     fn mouse_cursor(&mut self, _: f64, _:f64) {
@@ -70,6 +85,7 @@ impl InputMode for DefaultInputMode {
                     if let Some(ref mut selection_rc) = game.selection {
                         let cell = &(*selection_rc);
                         let mut selection = cell.borrow_mut();
+                        game.processor.send_command(Box::new(MoveCommand{}));
                         selection.target = Some(game.last_mouse_pos);
                     };
                     None
@@ -139,7 +155,27 @@ impl InputMode for SelectionInputMode {
     }
 }
 
+
+pub struct CommandProcessor {
+    remote: Remote
+}
+impl CommandProcessor {
+    pub fn new(rem: Remote) -> CommandProcessor {
+        CommandProcessor {
+            remote: rem,
+        }
+    }
+
+    pub fn send_command(&mut self, command: Box<Command>) {
+        self.remote.spawn(|_| {
+            ok({
+                println!("Sent a command");
+            })
+        });
+    }
+}
 pub struct GameLogic {
+    processor: CommandProcessor,
     last_mouse_pos: Vector2<f64>,
     movers: Vec<Rc<RefCell<Mover>>>,
     statics: Vec<Rc<RefCell<Static>>>,
@@ -147,8 +183,9 @@ pub struct GameLogic {
 }
 
 impl GameLogic {
-    pub fn new() -> GameLogic {
+    pub fn new(rem: Remote) -> GameLogic {
         GameLogic {
+            processor: CommandProcessor{remote: rem},
             last_mouse_pos: Vector2::new(0.0, 0.0),
             movers: vec![],
             statics: vec![Rc::new(RefCell::new(Static::new(Vector2::new(100.0, 100.0))))],
@@ -219,7 +256,7 @@ impl Game {
             textures: textures,
             texture: tex,
             input_mode: Box::new(DefaultInputMode::new()),
-            game_logic: GameLogic::new()
+            game_logic: GameLogic::new(rem)
         }
     }
 
