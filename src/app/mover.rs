@@ -1,5 +1,7 @@
 extern crate std;
 extern crate piston_window;
+extern crate uuid;
+
 use std::cell::*;
 use std::rc::*;
 use std::mem;
@@ -11,8 +13,13 @@ use app::shapes::*;
 use std::cmp::*;
 use piston_window::*;
 use app::textures::*;
+use app::uuid::Uuid;
+use app::ObjectId;
+
+
 
 pub struct Mover {
+    pub id: ObjectId,
     rotation: f64,
     pub target: Option<Vector2<f64>>,
     pub position: Vector2<f64>
@@ -22,6 +29,7 @@ impl Mover {
 
     pub fn new(position: Vector2<f64>) -> Mover {
         Mover {
+            id: Uuid::new_v4(),
             rotation: 10.0,
             target: None,
             position: position

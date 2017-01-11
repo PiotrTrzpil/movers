@@ -27,6 +27,7 @@ use std::time::*;
 use self::tokio_core::reactor::*;
 use std::thread;
 use std::sync::mpsc;
+use app::ObjectId;
 
 pub struct DefaultInputMode {
     last_mouse_pos: Vector2<f64>,
@@ -40,8 +41,10 @@ pub trait Command {
 }
 
 struct MoveCommand {
-
+    objectId: ObjectId,
+    target: Vector2<f64>
 }
+
 impl MoveCommand {
 
 }
@@ -84,8 +87,8 @@ impl InputMode for DefaultInputMode {
                 Button::Mouse(MouseButton::Right) => {
                     if let Some(ref mut selection_rc) = game.selection {
                         let cell = &(*selection_rc);
-                        let mut selection = cell.borrow_mut();
-                        game.processor.send_command(Box::new(MoveCommand{}));
+                        let mut selection: RefMut<Mover> = cell.borrow_mut();
+                        game.processor.send_command(Box::new(MoveCommand{objectId: selection.id, target: game.last_mouse_pos}));
                         selection.target = Some(game.last_mouse_pos);
                     };
                     None

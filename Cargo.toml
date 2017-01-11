@@ -31,6 +31,7 @@ futures = "0.1.6"
 futures-cpupool = "0.1.2"
 tokio-timer = { git = "https://github.com/tokio-rs/tokio-timer" }
 tokio-core = "0.1.3"
+uuid = { version = "0.3.1", features = ["v4"] }
 
 [dependencies.cgmath]
 git = "https://github.com/bjz/cgmath-rs.git"
