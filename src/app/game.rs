@@ -6,6 +6,7 @@ extern crate futures;
 extern crate tokio_timer;
 extern crate tokio_core;
 extern crate futures_cpupool;
+extern crate std;
 
 use self::futures_cpupool::*;
 use self::futures::*;
@@ -28,6 +29,8 @@ use self::tokio_core::reactor::*;
 use std::thread;
 use std::sync::mpsc;
 use app::ObjectId;
+use std::*;
+use std::fmt;
 
 pub struct DefaultInputMode {
     last_mouse_pos: Vector2<f64>,
@@ -36,21 +39,28 @@ struct SelectionInputMode {
     selection_shape: Selection,
 }
 
-pub trait Command {
-
+impl fmt::Display for Vect {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> fmt::Result {
+        write!(f, "({}, {})", self.wrapped.x, self.wrapped.y);
+        Ok(())
+    }
 }
 
-struct MoveCommand {
-    objectId: ObjectId,
-    target: Vector2<f64>
+pub struct Vect {
+    wrapped: Vector2<f64>,
 }
 
-impl MoveCommand {
-
+impl Vect {
+    fn new(wrapped: Vector2<f64>) -> Vect {
+        Vect {
+            wrapped: wrapped
+        }
+    }
 }
 
-impl Command for MoveCommand {
-
+pub enum Command {
+    MoveCommand(ObjectId, Vector2<f64>),
+    OtherCommand(ObjectId, Vector2<f64>)
 }
 
 pub trait InputMode {
@@ -88,7 +98,7 @@ impl InputMode for DefaultInputMode {
                     if let Some(ref mut selection_rc) = game.selection {
                         let cell = &(*selection_rc);
                         let mut selection: RefMut<Mover> = cell.borrow_mut();
-                        game.processor.send_command(Box::new(MoveCommand{objectId: selection.id, target: game.last_mouse_pos}));
+                        game.processor.send_command(Command::MoveCommand(selection.id, game.last_mouse_pos));
                         selection.target = Some(game.last_mouse_pos);
                     };
                     None
@@ -169,10 +179,13 @@ impl CommandProcessor {
         }
     }
 
-    pub fn send_command(&mut self, command: Box<Command>) {
-        self.remote.spawn(|_| {
+    pub fn send_command(&mut self, command: Command) {
+        self.remote.spawn(move |_| {
             ok({
-                println!("Sent a command");
+                if let Command::MoveCommand(id, target) = command {
+                    println!("Received a command to move {}, {}", id, Vect::new(target));
+                }
+
             })
         });
     }
